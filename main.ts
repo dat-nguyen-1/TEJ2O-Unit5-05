@@ -2,7 +2,7 @@
  *
  * Created by: Dat Nguyen
  * Created on: Mar 2026
- * This program calculate the distance in front of the micro:bit.
+ * This program will calculate the distance from the sonar.
 */
 
 // Intialize variables
