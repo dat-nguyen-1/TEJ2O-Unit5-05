@@ -21,47 +21,46 @@ class HCSR04:
         self.echo_pin = echo_pin
         self.sclk_pin = sclk_pin
 
-    def get_distance_mm(self):
         spi.init(
             baudrate=125000,
             sclk=self.sclk_pin,
             mosi=self.trigger_pin,
             miso=self.echo_pin,
         )
+
+    def get_distance_cm(self) -> int:
         pre = 0
         post = 0
-        k = -1
         length = 500
-        resp = bytearray(length)
-        resp[0] = 0xFF
-        spi.write_readinto(resp, resp)
+        response = bytearray(length)
+        response[0] = 0xFF
+        spi.write_readinto(response, response)
 
-        # find first non zero value
-        try:
-            i, value = next((ind, v) for ind, v in enumerate(resp) if v)
-        except StopIteration:
-            i = -1
+        # Find first non zero value
+        index_start = -1
+        for idx in range(length):
+            if response[idx]:
+                index_start = idx
+                break
+        if index_start == -1:
+            return -1
 
-        if i > 0:
-            pre = bin(value).count("1")
+        # Find first zero value after ping
+        index_end = -1
+        for idx in range(index_start + 1, length):
+            if response[idx] == 0:
+                index_end = idx
+                break
+        if index_end < 0:
+            return -1
 
-            # find first non full high value afterwards
-            try:
-                k, value = next(
-                    (ind, v)
-                    for ind, v in enumerate(resp[i : length - 2])
-                    if resp[i + ind + 1] == 0
-                )
-                post = bin(value).count("1") if k else 0
-                k = k + i
-            except StopIteration:
-                i = -1
-        dist = -1 if i < 0 else round(((pre + (k - i) * 8 + post) * 8 * 0.172) / 2)
+        # Count bits
+        if index_start > 0:
+            pre = response[index_start].bit_count()
+        if index_end >= 0:
+            post = response[index_end].bit_count()
 
-        return dist
-
-    def get_distance_cm(self):
-        return self.get_distance_mm() * 0.1
+        return round(((pre + (index_end - index_start) * 8 + post) * 8 * 0.0172) / 2)
 
 
 # Create sonar instance
