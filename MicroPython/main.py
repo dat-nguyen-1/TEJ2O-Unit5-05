@@ -56,9 +56,9 @@ class HCSR04:
 
         # Count bits
         if index_start > 0:
-            pre = response[index_start].bit_count()
+            pre = bin(response[index_start]).count("1")
         if index_end >= 0:
-            post = response[index_end].bit_count()
+            post = bin(response[index_end]).count("1")
 
         return round(((pre + (index_end - index_start) * 8 + post) * 8 * 0.0172) / 2)
 
@@ -74,6 +74,6 @@ display.show(Image.HAPPY)
 while True:
     if button_a.was_pressed():
         # Display distance
-        distance = sonar.distance_cm()
+        distance = sonar.get_distance_cm()
         display.clear()
-        display.show(distance)
+        display.scroll(str(distance) + " cm")
