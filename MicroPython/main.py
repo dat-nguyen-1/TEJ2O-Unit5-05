@@ -36,7 +36,7 @@ class HCSR04:
         response[0] = 0xFF
         spi.write_readinto(response, response)
 
-        # Find first non zero value
+        # find first non zero value
         index_start = -1
         for idx in range(length):
             if response[idx]:
@@ -45,7 +45,7 @@ class HCSR04:
         if index_start == -1:
             return -1
 
-        # Find first zero value after ping
+        # find first zero value after ping
         index_end = -1
         for idx in range(index_start + 1, length):
             if response[idx] == 0:
@@ -54,26 +54,30 @@ class HCSR04:
         if index_end < 0:
             return -1
 
-        # Count bits
+        # count bits
         if index_start > 0:
             pre = bin(response[index_start]).count("1")
         if index_end >= 0:
             post = bin(response[index_end]).count("1")
 
-        return round(((pre + (index_end - index_start) * 8 + post) * 8 * 0.0172) / 2)
+        return round(((pre + (index_end - index_start) * 8 + post) * 8 * 0.0344) * 0.5)
 
 
-# Create sonar instance
+# create sonar instance
 sonar = HCSR04(trigger_pin=pin1, echo_pin=pin2, sclk_pin=pin13)
 
-# Initialize display
+# initialize display
 display.clear()
 display.show(Image.HAPPY)
 
-# Main loop
+# main loop
 while True:
     if button_a.was_pressed():
-        # Display distance
+        # display distance
         distance = sonar.get_distance_cm()
         display.clear()
         display.scroll(str(distance) + " cm")
+
+        # reset display
+        display.clear()
+        display.show(Image.HAPPY)
