@@ -10,7 +10,7 @@ from microbit import *
 class HCSR04:
     """
     This class abstracts out the functionality of the HC-SR04 and
-    returns distance in mm
+    returns distance in cm
     Trigger: pin 1
     Echo: pin 2
     Serial clock: pin 13
